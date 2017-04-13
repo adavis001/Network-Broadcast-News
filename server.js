@@ -2,13 +2,16 @@
 const net = require('net');
 
 let clientPool = [];
-let sender = null;
 
 const server = net.createServer((connection) => {
 	clientPool.push(connection);
 	console.log('new connection!');
 	console.log(connection.id);
-	const stdin = process.stdin, stdout = process.stdout;
+
+
+	server.on('data', (data) => {
+		console.log(data.toString());
+	});
 
 
 	connection.write("Insert user name");
@@ -19,18 +22,24 @@ const server = net.createServer((connection) => {
 		console.log(connection.id);
 	});
 
+
 	connection.on('data', (data)=>{
 	console.log(data.toString());
-	sender = connection.id;
-		for(let i = 0; i<clientPool.length; i++){
+			for(let i = 0; i<clientPool.length; i++){
 			if(connection.id !== clientPool[i].id){
-				clientPool[i].write(connection.id + ":" + data);
-				console.log("sender: " + sender);		
+				clientPool[i].write(connection.id + ":" + data);	
 			}
 		}
 	});
 
 });
+
+	process.stdin.on('data',(data)=>{
+		for(let i = 0; i<clientPool.length; i++){
+			clientPool[i].write(`Admin: ${data}`);
+		}
+	});
+
 
 
 server.listen(9001,() => {
