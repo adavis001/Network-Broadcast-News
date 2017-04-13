@@ -2,6 +2,7 @@
 const net = require('net');
 
 let clientPool = [];
+let sender = null;
 
 const server = net.createServer((connection) => {
 	clientPool.push(connection);
@@ -20,8 +21,12 @@ const server = net.createServer((connection) => {
 
 	connection.on('data', (data)=>{
 	console.log(data.toString());
+	sender = connection.id;
 		for(let i = 0; i<clientPool.length; i++){
-			clientPool[i].write(connection.id + ":" + data);		
+			if(connection.id !== clientPool[i].id){
+				clientPool[i].write(connection.id + ":" + data);
+				console.log("sender: " + sender);		
+			}
 		}
 	});
 
